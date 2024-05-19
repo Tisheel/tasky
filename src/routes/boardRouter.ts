@@ -1,9 +1,13 @@
 import { Router } from 'express'
-import { createBoard } from '../controller/boardController.js'
+import { createBoard, joinBoard, leaveBoard, removeBoardMember } from '../controller/boardController.js'
 import { user } from '../middleware/user.js'
+import { boardAdmin } from '../middleware/boardAdmin.js'
 
 const router: Router = Router()
 
 router.post('/create', user, createBoard)
+router.post('/join/:boardId', user, joinBoard)
+router.delete('/leave/:boardId', user, leaveBoard)
+router.delete('/remove-member/:boardId/:userId', boardAdmin, removeBoardMember)
 
 export default router

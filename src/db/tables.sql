@@ -15,10 +15,11 @@ create table board (
 ) auto_increment = 1000;
 
 create table board_members (
-	board_id int,
+    board_id int,
     user_id int,
-    role varchar(25) default "member",
-    foreign key (board_id) references board(id),
+    role varchar(25) default 'member',
+    primary key (board_id, user_id),
+    foreign key (board_id) references board(id) on delete cascade,
     foreign key (user_id) references users(id)
 ) auto_increment = 1000;
 
@@ -34,6 +35,7 @@ create table tasks (
 create table task_members (
 	task_id int,
     user_id int,
+    primary key (task_id, user_id)
     foreign key (task_id) references tasks(id),
 	foreign key (user_id) references users(id)
 );

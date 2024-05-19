@@ -12,7 +12,7 @@ export const insertUser = (user: User, cb: (err: QueryError | null, result: Resu
     )
 }
 
-export const getUserById = (id: string, cb: (err: QueryError | null, result: RowDataPacket[], fields: FieldPacket[]) => any) => {
+export const getUserById = (id: number, cb: (err: QueryError | null, result: RowDataPacket[], fields: FieldPacket[]) => any) => {
     pool.execute(
         'SELECT name, email, profile FROM users WHERE id = ?',
         [id],
@@ -20,15 +20,15 @@ export const getUserById = (id: string, cb: (err: QueryError | null, result: Row
     )
 }
 
-export const getUserByEmail = (id: string, cb: (err: QueryError | null, result: RowDataPacket[], fields: FieldPacket[]) => any) => {
+export const getUserByEmail = (email: string, cb: (err: QueryError | null, result: RowDataPacket[], fields: FieldPacket[]) => any) => {
     pool.execute(
         'SELECT id, password FROM users WHERE email = ?',
-        [id],
+        [email],
         cb
     )
 }
 
-export const insertBoard = (board: Board, userId: string, cb: (err: QueryError | null, result?: ResultSetHeader, fields?: FieldPacket[]) => any) => {
+export const insertBoard = (board: Board, userId: number, cb: (err: QueryError | null, result?: ResultSetHeader, fields?: FieldPacket[]) => any) => {
     pool.getConnection((err, conn) => {
         if (err) {
             console.log(err)
@@ -49,7 +49,7 @@ export const insertBoard = (board: Board, userId: string, cb: (err: QueryError |
                     return
                 }
                 const boardId = result.insertId
-                conn.execute('INSERT INTO board_members (board_id, user_id) VALUES (?, ?)', [boardId, userId], (err, result: ResultSetHeader) => {
+                conn.execute('INSERT INTO board_members (board_id, user_id, role) VALUES (?, ?, "admin")', [boardId, userId], (err, result: ResultSetHeader) => {
                     if (err) {
                         cb(err)
                         conn.rollback(() => {
@@ -63,6 +63,7 @@ export const insertBoard = (board: Board, userId: string, cb: (err: QueryError |
                                 conn.release()
                             })
                         }
+                        result.insertId = boardId
                         cb(err, result)
                         conn.release()
                     })
@@ -70,4 +71,46 @@ export const insertBoard = (board: Board, userId: string, cb: (err: QueryError |
             })
         })
     })
+}
+
+export const insertBoardMembers = (board_id: number, user_id: number, cb: (err: QueryError | null, result: ResultSetHeader, fields: FieldPacket[]) => any) => {
+    pool.execute(
+        'INSERT INTO board_members (board_id, user_id) VALUES (?, ?)',
+        [board_id, user_id],
+        cb
+    )
+}
+
+export const getboardMemberRole = (board_id: number, user_id: number, cb: (err: QueryError | null, result: RowDataPacket[], fields: FieldPacket[]) => any) => {
+    pool.execute(
+        'SELECT role FROM board_members WHERE board_id = ? AND user_id = ?',
+        [board_id, user_id],
+        cb
+    )
+}
+
+export const deleteBoardMember = (board_id: number, user_id: number, cb: (err: QueryError | null, result?: ResultSetHeader, fields?: FieldPacket[]) => any) => {
+
+    pool.execute('SELECT COUNT(board_id) FROM board_members WHERE board_id = ?', [board_id], (err, result: RowDataPacket[]) => {
+        if (err) {
+            cb(err)
+            return
+        }
+        if (result[0]['COUNT(board_id)'] === 1) {
+            pool.execute('DELETE FROM board WHERE id = ?', [board_id], (err, result: ResultSetHeader, field) => {
+                cb(err, result, field)
+            })
+        } else {
+            pool.execute('DELETE FROM board_members WHERE board_id = ? AND user_id = ?', [board_id, user_id], (err, result: ResultSetHeader, fields) => {
+                cb(err, result, fields)
+            })
+        }
+    })
+
+}
+
+export const deleteBoard = (board_id: number, cb: (err: QueryError | null, result: ResultSetHeader, fields: FieldPacket[]) => any) => {
+
+    pool.execute('DELETE FROM board WHERE id = ?', [board_id], cb)
+
 }

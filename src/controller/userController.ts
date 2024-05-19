@@ -73,7 +73,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 export const userDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const id: string = req.params.id
+        const id: number = Number(req.params.id)
 
         getUserById(id, (err, rows) => {
             if (err) {

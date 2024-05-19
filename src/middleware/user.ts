@@ -1,10 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { jwt_secret } from '../utils/secrets.js'
-
-interface JWTPayload {
-    id: string
-}
+import { JWTPayload } from '../utils/types.js'
 
 export const user = (req: Request, res: Response, next: NextFunction) => {
     try {
