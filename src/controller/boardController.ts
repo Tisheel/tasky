@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { boardValidation } from '../utils/validation.js'
-import { deleteBoard, deleteBoardMember, getboardMemberRole, insertBoard, insertBoardMembers } from '../db/database.js'
+import { deleteBoard, deleteBoardMember, getBoardMembers, getboardMemberRole, insertBoard, insertBoardMembers } from '../db/database.js'
 
 export const createBoard = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -67,7 +67,7 @@ export const leaveBoard = async (req: Request, res: Response, next: NextFunction
             if (result.length === 0) {
                 res.status(400).json({
                     error: 'BOARD_MEMBERS_ERROR',
-                    message: `Resulting board_id and user_id mapping not found.`
+                    message: `Resulting board_id not found.`
                 })
                 return
             }
@@ -133,6 +133,37 @@ export const removeBoardMember = async (req: Request, res: Response, next: NextF
             res.status(200).json({
                 message: 'ok',
                 affectedRows: result?.affectedRows
+            })
+        })
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const boardMembers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const boardId = Number(req.params.boardId)
+
+        getBoardMembers(boardId, (err, result) => {
+            if (err) {
+                res.status(400).json({
+                    error: 'SQL_ERROR',
+                    message: err.message
+                })
+                return
+            }
+            if (result.length === 0) {
+                res.status(400).json({
+                    error: 'BOARD_MEMBERS_ERROR',
+                    message: `Resulting board_id not found.`
+                })
+                return
+            }
+            res.status(200).json({
+                message: 'ok',
+                result
             })
         })
 

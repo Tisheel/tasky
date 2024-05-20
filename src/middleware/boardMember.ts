@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { getboardMemberRole } from '../db/database.js'
 
-export const boardAdmin = (req: Request, res: Response, next: NextFunction) => {
+export const boardMember = (req: Request, res: Response, next: NextFunction) => {
     try {
 
         const boardId = Number(req.params.boardId)
@@ -23,14 +23,7 @@ export const boardAdmin = (req: Request, res: Response, next: NextFunction) => {
                 return
             }
 
-            if (result[0].role === 'admin') {
-                next()
-            } else {
-                res.status(400).json({
-                    error: 'USER_ROLE_ERROR',
-                    message: 'You do not have admin rights.'
-                })
-            }
+            next()
         })
 
     } catch (error) {

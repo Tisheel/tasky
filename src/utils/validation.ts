@@ -10,3 +10,11 @@ export const userValidation = z.object({
 export const boardValidation = z.object({
     title: z.string().min(3, 'Title should have atleast 3 characters.').max(25, 'Title can have maximum of 25 characters.')
 })
+
+export const taskValidation = z.object({
+    title: z.string().min(3, 'Title should have atleast 3 characters.').max(25, 'Title can have maximum of 25 characters.'),
+    description: z.string().min(25, 'Description should have atleast 3 characters.').max(255, 'Description can have maximum of 25 characters.'),
+    status: z.enum(["todo", "doing", "done"]),
+    deadline: z.coerce.date(),
+    priority: z.enum(["high", "medium", "low"])
+})

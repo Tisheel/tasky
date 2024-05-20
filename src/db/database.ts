@@ -1,6 +1,6 @@
 import { FieldPacket, QueryError, QueryResult, ResultSetHeader, RowDataPacket, createPool } from "mysql2"
 import access from "../config/mysql.js"
-import { Board, User } from "../utils/types.js"
+import { Board, Task, User } from "../utils/types.js"
 
 const pool = createPool(access)
 
@@ -90,7 +90,6 @@ export const getboardMemberRole = (board_id: number, user_id: number, cb: (err: 
 }
 
 export const deleteBoardMember = (board_id: number, user_id: number, cb: (err: QueryError | null, result?: ResultSetHeader, fields?: FieldPacket[]) => any) => {
-
     pool.execute('SELECT COUNT(board_id) FROM board_members WHERE board_id = ?', [board_id], (err, result: RowDataPacket[]) => {
         if (err) {
             cb(err)
@@ -106,11 +105,40 @@ export const deleteBoardMember = (board_id: number, user_id: number, cb: (err: Q
             })
         }
     })
-
 }
 
 export const deleteBoard = (board_id: number, cb: (err: QueryError | null, result: ResultSetHeader, fields: FieldPacket[]) => any) => {
-
     pool.execute('DELETE FROM board WHERE id = ?', [board_id], cb)
+}
 
+export const insertTask = (board_id: number, task: Task, cb: (err: QueryError | null, result: ResultSetHeader, fields: FieldPacket[]) => any) => {
+    pool.execute(
+        'INSERT INTO tasks (board_id, title, description, status, deadline, priority) VALUES (?, ?, ?, ?, ?, ?)',
+        [board_id, task.title, task.description, task.status, task.deadline, task.priority],
+        cb
+    )
+}
+
+export const getTasksByBoardId = (board_id: number, cb: (err: QueryError | null, result: RowDataPacket[], fields: FieldPacket[]) => any) => {
+    pool.execute(
+        'SELECT * FROM tasks WHERE board_id = ?',
+        [board_id],
+        cb
+    )
+}
+
+export const deleteTaskById = (task_id: number, cb: (err: QueryError | null, result: ResultSetHeader, fields: FieldPacket[]) => any) => {
+    pool.execute(
+        'DELETE FROM tasks WHERE id = ?',
+        [task_id],
+        cb
+    )
+}
+
+export const getBoardMembers = (board_id: number, cb: (err: QueryError | null, result: RowDataPacket[], fields: FieldPacket[]) => any) => {
+    pool.execute(
+        'SELECT user_id, name, email, profile, role FROM board_members JOIN users ON board_members.user_id = users.id WHERE board_id = ?',
+        [board_id],
+        cb
+    )
 }
